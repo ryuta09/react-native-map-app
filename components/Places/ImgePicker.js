@@ -38,7 +38,6 @@ function ImagePicker() {
       aspect: [16, 9], // アスペクト比を設定
       quality: 0.5, // 少し小さめの画像を取得
     });
-    console.log(image.assets[0].uri);
     setPickedImage(image.assets[0].uri);
 
   }
