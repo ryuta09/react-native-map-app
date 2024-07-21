@@ -1,4 +1,4 @@
-import { Alert, StyleSheet, View } from "react-native";
+import { Alert, Image, StyleSheet, Text, View } from "react-native";
 import {
   getCurrentPositionAsync,
   useForegroundPermissions,
@@ -6,8 +6,12 @@ import {
 } from "expo-location";
 import OutlineButton from "../../UI/OutlinedButton";
 import { Colors } from "../../constants/colors";
+import { useState } from "react";
+import { getMapPreview } from "../../util/location";
 
 function LocationPicker() {
+  const [pickdLocation, setPickedLocation] = useState(null);
+  console.log("pickdLocationの中身は ", JSON.stringify(pickdLocation, null, 2)); // オブジェクト全体を表示
   const [locationPermissionInformation, requestPermission] =
     useForegroundPermissions();
   async function veritfyPermissions() {
@@ -31,15 +35,30 @@ function LocationPicker() {
     if (!hasPermission) {
       return;
     }
-    const locatoin = await getCurrentPositionAsync();
-    console.log(locatoin);
+    const location = await getCurrentPositionAsync();
+    console.log("locationの中身は " + location);
+    console.log("location.coords.latitudeの中身は " + location.coords.latitude);
+    console.log("location.coords.longitudeの中身は " + location.coords.longitude);
+    setPickedLocation({
+      lat: location.coords.latitude,
+      lng: location.coords.longitude,
+    });
   }
 
   function pickOnMapHandler() {}
+  let locationPreview = <Text>No location</Text>;
+  if (pickdLocation) {
+    locationPreview = (
+      <Image
+        source={{ uri: getMapPreview(pickdLocation.lat, pickdLocation.lng) }}
+        style={styles.image}
+      />
+    );
+  }
 
   return (
     <View>
-      <View style={styles.mapPreview}></View>
+      <View style={styles.mapPreview}>{locationPreview}</View>
       <View style={styles.actions}>
         <OutlineButton icon={"location"} onPress={getLocatoinHandler}>
           Locate User
@@ -63,10 +82,16 @@ const styles = StyleSheet.create({
     alignItems: "center",
     backgroundColor: Colors.primary100,
     borderRadius: 4,
+    overflow: 'hidden'
   },
   actions: {
     flexDirection: "row",
     justifyContent: "space-around",
     alignItems: "center",
+  },
+  image: {
+    width: "100%",
+    height: "100%",
+    borderRadius: 4,
   },
 });
