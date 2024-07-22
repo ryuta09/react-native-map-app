@@ -8,10 +8,11 @@ import OutlineButton from "../../UI/OutlinedButton";
 import { Colors } from "../../constants/colors";
 import { useState } from "react";
 import { getMapPreview } from "../../util/location";
+import { useNavigation } from "@react-navigation/native";
 
 function LocationPicker() {
   const [pickdLocation, setPickedLocation] = useState(null);
-  console.log("pickdLocationの中身は ", JSON.stringify(pickdLocation, null, 2)); // オブジェクト全体を表示
+  const navigation = useNavigation()
   const [locationPermissionInformation, requestPermission] =
     useForegroundPermissions();
   async function veritfyPermissions() {
@@ -36,16 +37,15 @@ function LocationPicker() {
       return;
     }
     const location = await getCurrentPositionAsync();
-    console.log("locationの中身は " + location);
-    console.log("location.coords.latitudeの中身は " + location.coords.latitude);
-    console.log("location.coords.longitudeの中身は " + location.coords.longitude);
     setPickedLocation({
       lat: location.coords.latitude,
       lng: location.coords.longitude,
     });
   }
 
-  function pickOnMapHandler() {}
+  function pickOnMapHandler() {
+    navigation.navigate('Map')
+  }
   let locationPreview = <Text>No location</Text>;
   if (pickdLocation) {
     locationPreview = (
