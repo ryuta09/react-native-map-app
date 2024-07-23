@@ -7,27 +7,41 @@ import {
 import OutlineButton from "../../UI/OutlinedButton";
 import { Colors } from "../../constants/colors";
 import { useEffect, useState } from "react";
-import { getMapPreview } from "../../util/location";
-import { useNavigation, useRoute, useIsFocused } from "@react-navigation/native";
+import { getAddress, getMapPreview } from "../../util/location";
+import {
+  useNavigation,
+  useRoute,
+  useIsFocused,
+} from "@react-navigation/native";
 
-function LocationPicker() {
+function LocationPicker({ onPickLocation }) {
   const [pickdLocation, setPickedLocation] = useState(null);
   const navigation = useNavigation();
   const route = useRoute();
-  const isFocused = useIsFocused()
-  const [locationPermissionInformation, requestPermission] = useForegroundPermissions();
-
-
+  const isFocused = useIsFocused();
+  const [locationPermissionInformation, requestPermission] =
+    useForegroundPermissions();
 
   useEffect(() => {
-    if(isFocused && route.params) {
+    if (isFocused && route.params) {
       const mapPickedLocation = {
         lat: route.params.pickedLat,
         lng: route.params.pickedLng,
       };
-      setPickedLocation(mapPickedLocation)
+      setPickedLocation(mapPickedLocation);
     }
-  },[route, isFocused])
+  }, [route, isFocused]);
+
+  useEffect(() => {
+    async function handleLocation() {
+      if (pickdLocation) {
+        const address = await getAddress(pickdLocation.lat, pickdLocation.lng);
+        onPickLocation({ ...pickdLocation, address: address });
+      }
+    }
+
+    handleLocation();
+  }, [pickdLocation, onPickLocation]);
 
   async function veritfyPermissions() {
     if (
@@ -45,7 +59,7 @@ function LocationPicker() {
 
     return true;
   }
-  async function getLocatoinHandler() {
+  async function getLocationHandler() {
     const hasPermission = await veritfyPermissions();
     if (!hasPermission) {
       return;
@@ -74,7 +88,7 @@ function LocationPicker() {
     <View>
       <View style={styles.mapPreview}>{locationPreview}</View>
       <View style={styles.actions}>
-        <OutlineButton icon={"location"} onPress={getLocatoinHandler}>
+        <OutlineButton icon={"location"} onPress={getLocationHandler}>
           Locate User
         </OutlineButton>
         <OutlineButton icon={"map"} onPress={pickOnMapHandler}>
